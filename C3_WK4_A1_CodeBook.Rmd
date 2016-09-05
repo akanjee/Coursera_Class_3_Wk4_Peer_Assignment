@@ -1,0 +1,117 @@
+---
+title: "C3_WK4_A1"
+date: "September 3, 2016"
+output: html_document
+---
+# Assignment
+The purpose of this project is to demonstrate your ability to collect, work with, and clean a data set. 
+
+The goal is to prepare tidy data that can be used for later analysis. 
+
+You will be graded by your peers on a series of yes/no questions related to the project. You will be required to submit: 
+
+- 1) a tidy data set as described below, 
+- 2) a link to a Github repository with your script for performing the analysis,
+- 3) a code book that describes the variables, the data, and any transformations or work that you performed to clean up the data called CodeBook.md. 
+
+# Load Data & Explore
+
+```{r}
+library(plyr)
+library(data.table)
+
+setwd("~/Documents/R Working Directory/Course_3_Getting_and_Cleaning_Data") ## Set the Working Directory
+
+if(!file.exists("./data")){dir.create("./data")}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip" ### Provide the URL of where to get the file from 
+
+#download.file(fileUrl,destfile="./data/Dataset.zip",method="curl") ### Download the file and place it in a directory for analysis
+#unzip(zipfile="./data/Dataset.zip",exdir="./data") ### Unzip the ZIP file with the built in module
+
+path_rf <- file.path("./data" , "UCI HAR Dataset") ### Create a list of the directories within the folder
+
+files<-list.files(path_rf, recursive=TRUE)  ### Create a list of the files within the directories within the folders
+files
+
+```
+
+We now have a full list of all of the files in the ZIP.  We need to get the SUBJECT Training & Test files to complete our activities.  Based on the information provided we will need to get the TRAIN & TEST files for SUBJECT, X & Y.
+
+```{r}
+setwd("~/Documents/R Working Directory/Course_3_Getting_and_Cleaning_Data/data/UCI HAR Dataset")
+subjectTrain = read.table('./train/subject_train.txt',header=FALSE)
+xTrain = read.table('./train/x_train.txt',header=FALSE)
+yTrain = read.table('./train/y_train.txt',header=FALSE)
+
+subjectTest = read.table('./test/subject_test.txt',header=FALSE)
+xTest = read.table('./test/x_test.txt',header=FALSE)
+yTest = read.table('./test/y_test.txt',header=FALSE)
+
+Activity  = read.table('./activity_labels.txt',header=FALSE) ## Load the Activity Labels
+Features = read.table('./features.txt',header=FALSE) ## Load the Feature Description 
+```
+
+```
+
+# Clean & Transform Data
+Now that the data has been tagged, I will proceed to join the data into a single table and label the columns as required
+```{r echo = FALSE}
+
+xDataSet <- rbind(xTrain, xTest)
+yDataSet <- rbind(yTrain, yTest)
+subjectDataSet <- rbind(subjectTrain, subjectTest)
+```
+
+##Extract only the measurements on the mean and standard deviation for each measurement
+```{r}
+
+xDataSet_mean_std <- xDataSet[, grep("-(mean|std)\\(\\)", Features[, 2])]
+names(xDataSet_mean_std) <- Features[grep("-(mean|std)\\(\\)", Features[, 2]), 2] 
+```
+
+##Apply descriptive activity names to name the activities in the data set
+```{r}
+yDataSet[, 1] <- Activity[yDataSet[, 1], 2]
+names(yDataSet) <- c("Activity")
+yDataSet[1:5,]
+names(subjectDataSet) <- c("Subject")
+```
+## Create a single data set
+```{r}
+AggregatedDataSet <- cbind(xDataSet_mean_std, yDataSet, subjectDataSet)
+```
+
+## Label the Columns with more descriptive names based on Features.Txt
+```{r}
+names(AggregatedDataSet) <-gsub('tBodyAcc-',"Time_Domain_Body_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tGravityAcc-',"Time_Domain_Gravity_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tBodyAccJerk-',"Time_Domain_Linear_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tBodyGyro-',"Time_Domain_Angulaur_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tBodyGyroJerk-',"Time_Domain_Angulaur_Acceleration_Velocity_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tBodyAccMag-',"Time_Domain_Body_Acceleration_Magintude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tGravityAccMag-',"Time_Domain_Gravity_Acceleration_Magnitude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tBodyAccJerkMag-',"Time_Domain_Linear_Acceleration_Magnitude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tBodyGyroMag-',"Time_Domain_Angulaur_Acceleration_Magnitude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('tBodyGyroJerkMag-',"Time_Domain_Angulaur_Acceleration_Velocity_Magnitude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyGyroJerkMag-',"Frequency_Domain_Angulaur_Acceleration_Velocity_Magnitude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyAccJerkMag-',"Frequency_Domain_Linear_Acceleration_Magnitude_",names(AggregatedDataSet))                             
+names(AggregatedDataSet) <-gsub('fBodyGyroMag-',"Frequency_Domain_Angulaur_Acceleration_Magnitude_",names(AggregatedDataSet))                                       
+names(AggregatedDataSet) <-gsub('fBodyGyroJerkMag-',"Frequency_Domain_Angulaur_Acceleration_Velocity_Magnitude_",names(AggregatedDataSet))    
+names(AggregatedDataSet) <-gsub('fBodyAccJerk-',"Frequency_Domain_Linear_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyAccJerkMag-',"Frequency_Domain_Linear_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyGyroMag-',"Frequency_Domain_Angulaur_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyAccMag-',"Frequency_Domain_Body_Acceleration_Magintude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyGyro-',"Frequency_Domain_Angulaur_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyAcc-',"Frequency_Domain_Body_Acceleration_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyBodyAccJerk-',"Frequency_Domain_Linear_Acceleration_",names(AggregatedDataSet))                            
+names(AggregatedDataSet) <-gsub('fBodyBodyGyroMag-', "Frequency_Domain_Angulaur_Acceleration_Magnitude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('fBodyBodyGyroJerkMag-',"Frequency_Domain_Angulaur_Acceleration_Velocity_Magnitude_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('mean',"Mean_",names(AggregatedDataSet))
+names(AggregatedDataSet) <-gsub('std',"Standard_Deviation_",names(AggregatedDataSet))
+```
+
+## Create a second, independent tidy data set with the average of each variable for each activity and each subject.
+```{r}
+FinalDataSet<-aggregate(. ~Subject + Activity, AggregatedDataSet, mean)  ## Create a new data set that finds the average for each of the different Subjects and Activities
+write.table(FinalDataSet, file = "./tidydata.txt",row.name=FALSE)
+```
