@@ -25,17 +25,11 @@ setwd("~/Documents/R Working Directory/Course_3_Getting_and_Cleaning_Data") ## S
 if(!file.exists("./data")){dir.create("./data")}
 fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip" ### Provide the URL of where to get the file from 
 
-#download.file(fileUrl,destfile="./data/Dataset.zip",method="curl") ### Download the file and place it in a directory for analysis
-#unzip(zipfile="./data/Dataset.zip",exdir="./data") ### Unzip the ZIP file with the built in module
-
-path_rf <- file.path("./data" , "UCI HAR Dataset") ### Create a list of the directories within the folder
-
-files<-list.files(path_rf, recursive=TRUE)  ### Create a list of the files within the directories within the folders
-files
-
+download.file(fileUrl,destfile="./data/Dataset.zip",method="curl") ### Download the file and place it in a directory for analysis
+unzip(zipfile="./data/Dataset.zip",exdir="./data") ### Unzip the ZIP file with the built in module
 ```
 
-We now have a full list of all of the files in the ZIP.  We need to get the SUBJECT Training & Test files to complete our activities.  Based on the information provided we will need to get the TRAIN & TEST files for SUBJECT, X & Y.
+We need to get the SUBJECT Training & Test files to complete our activities.  Based on the information provided we will need to get the TRAIN & TEST files for SUBJECT, X & Y.
 
 ```{r}
 setwd("~/Documents/R Working Directory/Course_3_Getting_and_Cleaning_Data/data/UCI HAR Dataset")
@@ -51,8 +45,6 @@ Activity  = read.table('./activity_labels.txt',header=FALSE) ## Load the Activit
 Features = read.table('./features.txt',header=FALSE) ## Load the Feature Description 
 ```
 
-```
-
 # Clean & Transform Data
 Now that the data has been tagged, I will proceed to join the data into a single table and label the columns as required
 ```{r echo = FALSE}
@@ -64,7 +56,6 @@ subjectDataSet <- rbind(subjectTrain, subjectTest)
 
 ##Extract only the measurements on the mean and standard deviation for each measurement
 ```{r}
-
 xDataSet_mean_std <- xDataSet[, grep("-(mean|std)\\(\\)", Features[, 2])]
 names(xDataSet_mean_std) <- Features[grep("-(mean|std)\\(\\)", Features[, 2]), 2] 
 ```

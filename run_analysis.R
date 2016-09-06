@@ -13,11 +13,6 @@ fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%2
 download.file(fileUrl,destfile="./data/Dataset.zip",method="curl") ### Download the file and place it in a directory for analysis
 unzip(zipfile="./data/Dataset.zip",exdir="./data") ### Unzip the ZIP file with the built in module
 
-path_rf <- file.path("./data" , "UCI HAR Dataset") ### Create a list of the directories within the folder
-
-files<-list.files(path_rf, recursive=TRUE)  ### Create a list of the files within the directories within the folders
-files
-
 ###Load the individual data files
 
 setwd("~/Documents/R Working Directory/Course_3_Getting_and_Cleaning_Data/data/UCI HAR Dataset")
